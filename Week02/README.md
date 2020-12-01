@@ -5,7 +5,7 @@
 # 答案
 不应该，大部分情况下应该直接return空值。
 例如：
-`
+```go
 func dao() (string, error)
 	id := 43
 	var username string
@@ -18,12 +18,12 @@ func dao() (string, error)
 	default:
 		return username, nil
 	}
-`
+```
 
 1. 如果DAO层返回了sql.ErrNoRows错误，Service层需要去判断这个Error是不是sql.ErrNoRows，这个Dependency是多余的。并且再判断完这个Error后，仍然需要去判断
 数据结构是否为空，防止panic。
 例如：
-`
+```go
 func biz() error{
     user, err := dao()
     if err != nil{
@@ -39,7 +39,7 @@ func biz() error{
     }
     return nil
 }
-`
+```
 2. 主要原因是sql.ErrNoRows这个错误，在大部分情况下和Service Unavailable也就是500的错误是不在同一优先级的，大部分应用不在意这个错误。
 
 3. https://github.com/xo/xo/issues/60 这里的讨论也挺不错有道理的的，只有Go语言把No results当成一个error，并且ErrNoRows和数据体是nil是完全等价的。
