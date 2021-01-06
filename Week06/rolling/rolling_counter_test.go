@@ -37,11 +37,11 @@ func TestRollingCountSum(t *testing.T) {
 	counter.Add(1.0)
 	res := counter.Sum()
 	if res != 3.0 {
-		t.Errorf("expected to be 3, but got %v", res)
+		t.Errorf("expected to be 3, but got %v, buckets: %v", res, counter.window.buckets)
 	}
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(2600 * time.Millisecond)
 	res = counter.Sum()
 	if res != 1.0 {
-		t.Errorf("expected to be 1, but got %v", res)
+		t.Errorf("expected to be 1, but got %v, buckets: %v", res, counter.window.buckets)
 	}
 }

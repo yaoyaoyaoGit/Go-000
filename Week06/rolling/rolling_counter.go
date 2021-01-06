@@ -1,7 +1,6 @@
 package rolling
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -64,12 +63,13 @@ func newWindow(size int, bucketSizeInMs time.Duration) *window {
 
 func (w *window) add(value float64) {
 	ts := w.getTimespan()
+	w.lastAddAt = w.lastAddAt.Add(time.Duration(ts) * w.bucketSizeInMs)
 	if ts == 0 {
 		w.buckets[w.offset] += value
 		return
 	}
-	w.lastAddAt = w.lastAddAt.Add(time.Duration(ts) * w.bucketSizeInMs)
 	if ts > w.size {
+		// if greater than window size, expired whole window and let next offset = current offset
 		ts = w.size
 	}
 	s := w.offset + 1
@@ -83,7 +83,7 @@ func (w *window) add(value float64) {
 	for i := s; i < e; i++ {
 		w.buckets[i] = 0
 	}
-	for i := 0; i <= e1; i++ {
+	for i := 0; i < e1; i++ {
 		w.buckets[i] = 0
 	}
 	w.buckets[ns] = value
@@ -103,8 +103,7 @@ func (w *window) reduce(f reducer) float64 {
 	}
 	values := make([]float64, count)
 	for i := range values {
-		fmt.Println((w.offset+ts+i)%w.size, w.buckets[(w.offset+ts+i)%w.size])
-		values[i] = w.buckets[(w.offset+ts+i)%w.size]
+		values[i] = w.buckets[(w.offset+w.size-i)%w.size]
 	}
 	return f(values)
 }
